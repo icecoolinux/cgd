@@ -5,7 +5,7 @@ from PIL import Image
 from skimage.util import random_noise
 
 name = "denoise_image"
-c = 0.5
+c = 100
 
 def read_image(image_path):
 	image = Image.open(image_path)
@@ -36,7 +36,7 @@ def save_image(array, filename):
 	img = Image.fromarray(base_img.astype(np.uint8))
 	img.save(filename)
 
-array, width, height = read_image("./cups.jpg")
+array, width, height = read_image("./data/cups.jpg")
 #array, width, height = crop(array, width, height)
 save_image(array, f"./original_cropped.png")
 noisy_image = get_noisy_image(array)
@@ -113,10 +113,11 @@ def f_grad2(x):
 	H_diag = np.ones(len(x))
 	return H_diag
 
-def P(x):
+def P(y):
 	'''
 	Usamos Norm 2 al cuadrado
 	Norma 1 no es diferenciable en todos los puntos.
+	'''
 	'''
 	error = 0
 	# Para cada fila
@@ -134,9 +135,33 @@ def P(x):
 				error +=  ( pow(pixel - pixel_left, 2) + pow(pixel - pixel_top, 2) ) / 2
 				#error += abs(pixel - pixel_left)
 	return error
+	'''
+	# Initialize the sum
+	total = 0
+
+	# Shape of the input grid
+	rows = height
+	cols = width
+
+	# Iterate through the grid
+	for i in range(rows):
+		for j in range(cols):
+			for k in range(3):
+				pos = k * width * height + i * width + j
+
+				# Contribution from row neighbors
+				if i < rows - 1:  # y[i+1, j] - y[i, j]
+					total += abs(y[pos + width] - y[pos])
+
+				# Contribution from column neighbors
+				if j < cols - 1:  # y[i, j+1] - y[i, j]
+					total += abs(y[pos+1] - y[pos])
+
+	return total
 
 
-def P_grad(x):
+def P_grad(y):
+	'''
 	gradient = np.zeros( len(x) )
 	epsilon = 1e-10  # Para evitar divisiones por cero
 
@@ -168,6 +193,49 @@ def P_grad(x):
 				# Propagar gradiente al vecino superior
 				#gradient[pos - width] -= diff_top
 
+	return gradient
+	'''
+	"""
+	Compute the gradient of the expression:
+	sum_{i,j} |y[i+1,j] - y[i,j]| + |y[i,j+1] - y[i,j]|
+
+	Args:
+	    y (2D numpy array): A 2D grid of values y[i, j]
+
+	Returns:
+	    gradient (2D numpy array): Gradient values for each element in y
+	"""
+	# Initialize gradient array with zeros
+	gradient = np.zeros_like(y)
+
+	# Shape of the input grid
+	rows = height
+	cols = width
+
+	# Compute gradients
+	for i in range(rows):
+		for j in range(cols):
+			for k in range(3):
+				pos = k * width * height + i * width + j
+
+				# Contributions from row neighbors
+				if i < rows - 1:  # y[i+1, j] - y[i, j]
+					diff = y[pos + width] - y[pos]
+					gradient[pos] -= 1 if diff > 0 else -1 if diff < 0 else 0
+				'''
+				if i > 0:  # y[i, j] - y[i-1, j]
+					diff = y[pos] - y[pos - width]
+					gradient[pos] += 1 if diff > 0 else -1 if diff < 0 else 0
+				'''
+				# Contributions from column neighbors
+				if j < cols - 1:  # y[i, j+1] - y[i, j]
+					diff = y[pos + 1] - y[pos]
+					gradient[pos] -= 1 if diff > 0 else -1 if diff < 0 else 0
+				'''
+				if j > 0:  # y[i, j] - y[i, j-1]
+					diff = y[pos] - y[pos -1]
+					gradient[pos] += 1 if diff > 0 else -1 if diff < 0 else 0
+				'''
 	return gradient
 
 
