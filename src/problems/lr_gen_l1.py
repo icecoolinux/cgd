@@ -9,11 +9,10 @@ import h5py
 import numpy as np
 import math
 
-name = "lr_gen_cancer"
-c = 0.5
+name = "lr_gen_l1"
 
 # Cargo matriz de muestras genéticas de cancer.
-path = "./data.h5"
+path = "./data/data.h5"
 
 db = h5py.File(path, mode = 'r')
 X = db["RNASeq"][...]
@@ -150,7 +149,7 @@ def P_grad(x):
 	return x / np.sqrt( 1 + np.power(x/delta, 2) )
 	'''
 
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	'''
 	Calcula direccion d de forma exacta.
 	Se realiza acá porque depende de la función f, P y sus derivadas.

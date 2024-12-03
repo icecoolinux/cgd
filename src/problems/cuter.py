@@ -42,7 +42,6 @@ import numpy as np
 import math
 
 name = "cuter_eg2"
-c = 1
 
 problem_name = 'EG2'
 #problem_name = 'DIXON3DQ'
@@ -62,7 +61,7 @@ def x_init():
 	return np.random.rand(p.n)
 
 def f(x):
-	retrn p.obj(x)
+	return p.obj(x)
 
 def f_and_grad(x):
 	f_value = p.obj(x)
@@ -90,7 +89,7 @@ def P_grad(x):
 	return grad
 
 
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	'''
 	Calcula direccion d de forma exacta.
 	Se realiza acá porque depende de la función f, P y sus derivadas.
@@ -100,6 +99,7 @@ def calculate_direction_all(x, grad_f_x, H_diag):
 	return - (grad_f_x + c*grad_P_x) / H_diag
 	'''
 	# Calculate direction at P norm1 as the paper
+	n = len(x)
 	d = np.zeros(n)
 	for j in range(n):
 		abc = [ (grad_f_x[j] - c) / H_diag[j],

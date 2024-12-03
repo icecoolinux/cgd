@@ -5,7 +5,6 @@ from PIL import Image
 from skimage.util import random_noise
 
 name = "denoise_image"
-c = 100
 
 def read_image(image_path):
 	image = Image.open(image_path)
@@ -239,7 +238,7 @@ def P_grad(y):
 	return gradient
 
 
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	'''
 	Calcula direccion d de forma exacta.
 	Se realiza acá porque depende de la función f, P y sus derivadas.

@@ -5,7 +5,6 @@ import numpy as np
 import math
 
 name = "more_trig"
-c = 10
 n = 1000
 
 def save_solution(k, x, J, d, alfa, metrics):
@@ -76,7 +75,7 @@ def P_grad(x):
 	return grad
 
 
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	'''
 	Calcula direccion d de forma exacta.
 	Se realiza acá porque depende de la función f, P y sus derivadas.

@@ -2,7 +2,6 @@
 import numpy as np
 
 name = "easy"
-c = 0.01
 
 def save_solution(k, x, J, d, alfa, metrics):
 	pass
@@ -33,7 +32,7 @@ def P_grad(x):
 
 # Calcula direccion d de forma exacta.
 # Se realiza acá porque depende de la función f, P y sus derivadas.
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	# Calculate direction at P norm1 as the paper
 	n = len(x)
 	d = np.zeros(n)

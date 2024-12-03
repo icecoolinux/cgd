@@ -7,7 +7,6 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
 name = "more_eps"
-c = 100
 n = 1000
 
 def save_solution(k, x, J, d, alfa, metrics):
@@ -190,7 +189,7 @@ def P_grad(x):
 
 ## direction
 
-def calculate_direction_all(x, grad_f_x, H_diag):
+def calculate_direction_all(x, grad_f_x, H_diag, c):
 	'''
 	Calcula direccion d de forma exacta.
 	Se realiza acá porque depende de la función f, P y sus derivadas.

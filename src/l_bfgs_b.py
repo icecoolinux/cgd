@@ -2,9 +2,10 @@ import time
 import numpy as np
 from scipy.optimize import minimize
 
-def l_bfgs_b(problem):
+def l_bfgs_b(problem, c):
+	
     def count_nonzeros(x):
-        threshold = 1e-7
+        threshold = 1e-15
         return np.count_nonzero(np.abs(x) > threshold)
 
     # Definir la función objetivo reformulada
@@ -14,7 +15,7 @@ def l_bfgs_b(problem):
         z = params[n:]  # Últimas n variables son z
         
         # f(y - z) + c * sum(y + z)
-        return problem.f(y - z) + problem.c * np.sum(y + z)
+        return problem.f(y - z) + c * np.sum(y + z)
 
     # Initial guess
     x0 = problem.x_init()
@@ -31,7 +32,9 @@ def l_bfgs_b(problem):
     ts1 = time.perf_counter_ns() # Time 1
 
     # Optimización
-    result = minimize(objective, initial_params, method='L-BFGS-B', bounds=bounds)
+    result = minimize(objective, initial_params, method='L-BFGS-B', bounds=bounds, options={'ftol':1e-4, 'maxfun':float('inf'), 'gtol':float('-inf') })
+
+    print(result.message)
 
     # Recuperar y y z
     y_opt = result.x[:n]
@@ -40,5 +43,5 @@ def l_bfgs_b(problem):
 
     ts2 = time.perf_counter_ns() # Time 2
 
-    return result.x, result.fun, count_nonzeros(result.x), (ts2-ts1)/1000000000
+    return x_opt, problem.f(x_opt), count_nonzeros(x_opt), (ts2-ts1)/1000000000
 

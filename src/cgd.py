@@ -36,24 +36,6 @@ def choice_coordinates(k, d_all, alfa_k, v_k):
 		return J, v
 
 	def gauss_southwell_q():
-		'''
-		# calculate v for k+1
-		if alfa_k > 1e-3:
-			v = max(1e-4, v_k/10)
-		elif alfa_k < 1e-6:
-			v = min(0.9, 50*v_k)
-		else:
-			v = v_k
-
-		# calculate max direction component.
-		gradient
-		d_max = np.max(np.abs(d_all))
-		J = []
-		for i in range(n):
-			if np.abs(d_all[i]) >= v*d_max:
-				J.append(i)
-		return J, v
-		'''
 		pass
 
 	#return gauss_seidel()
@@ -84,14 +66,12 @@ def calulate_direction(J, d_all):
 		d[i] = d_all[i]
 	return d
 
-def calculate_alpha(problem, x, F_x, grad_f_x, d, H_diag, alfa_init_k, armijo, use_parallel):
+def calculate_alpha(problem, c, x, F_x, grad_f_x, d, H_diag, alfa_init_k, armijo, use_parallel):
 	'''
 	Calcula tamaño del paso alfa.
 	Utiliza Armijo, los hiperparámetros utilizados son los del paper.
 	Retorna alfa y H @ d, este último es utilizado para la condición de parada.
 	'''
-	
-	c = problem.c
 	
 	# Solo hago el calculo con la diagonal, es una mejora importante propuesta en el paper
 	#Hd = H @ d
@@ -115,13 +95,11 @@ def calculate_alpha(problem, x, F_x, grad_f_x, d, H_diag, alfa_init_k, armijo, u
 		j += 1
 
 def count_nonzeros(x):
-	threshold = 1e-7
+	threshold = 1e-15
 	return np.count_nonzero(np.abs(x) > threshold)
 
 
-def step(k, x, problem, armijo, alfa, v_gauss_southwell, use_parallel, ts_metrics):
-
-	c = problem.c
+def step(k, x, problem, c, armijo, alfa, v_gauss_southwell, use_parallel, ts_metrics):
 
 	ts1 = time.perf_counter_ns() # Time 1
 	if use_parallel:
@@ -139,7 +117,7 @@ def step(k, x, problem, armijo, alfa, v_gauss_southwell, use_parallel, ts_metric
 	H_diag = calculate_H(problem, x, use_parallel)
 	ts5 = time.perf_counter_ns() # Time 5
 
-	d_all = problem.calculate_direction_all(x, grad_f_x, H_diag)
+	d_all = problem.calculate_direction_all(x, grad_f_x, H_diag, c)
 	ts6 = time.perf_counter_ns() # Time 6
 
 	J, v_gauss_southwell = choice_coordinates(k, d_all, alfa, v_gauss_southwell)
@@ -148,7 +126,7 @@ def step(k, x, problem, armijo, alfa, v_gauss_southwell, use_parallel, ts_metric
 	d = calulate_direction(J, d_all)
 	ts8 = time.perf_counter_ns() # Time 8
 
-	alfa, Hd = calculate_alpha(problem, x, F_x, grad_f_x, d, H_diag, alfa, armijo, use_parallel)
+	alfa, Hd = calculate_alpha(problem, c, x, F_x, grad_f_x, d, H_diag, alfa, armijo, use_parallel)
 	ts9 = time.perf_counter_ns() # Time 9
 
 
