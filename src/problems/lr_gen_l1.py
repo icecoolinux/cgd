@@ -5,6 +5,7 @@
 # que 0 sea el punto de corte.
 # Queda oscilando, será alfa muy grande?
 
+from sklearn.preprocessing import StandardScaler
 import h5py
 import numpy as np
 import math
@@ -17,6 +18,10 @@ path = "./data/data.h5"
 db = h5py.File(path, mode = 'r')
 X = db["RNASeq"][...]
 y = db["label"][...]
+
+# Standarizo X
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
 
 # Clasificacion binaria de un solo tipo de cancer.
 y_binary_10 = np.where(y == 10, 1, -1)
